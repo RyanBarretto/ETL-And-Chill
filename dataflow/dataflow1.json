@@ -1,0 +1,233 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Excelmetadata",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "Excelstation1",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				},
+				{
+					"dataset": {
+						"referenceName": "Excelstation2",
+						"type": "DatasetReference"
+					},
+					"name": "source3"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Parquetsink",
+						"type": "DatasetReference"
+					},
+					"name": "sink",
+					"rejectedDataLinkedService": {
+						"referenceName": "linkedserviceDL",
+						"type": "LinkedServiceReference"
+					}
+				},
+				{
+					"dataset": {
+						"referenceName": "Parquetsink1",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "Parquet1",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				}
+			],
+			"transformations": [
+				{
+					"name": "replacenulls",
+					"description": "Replacing Nulls with mean (Memory_Usage (%))"
+				},
+				{
+					"name": "replacenulls1",
+					"description": "Replacing Disk_IO (%) nulls values to 0"
+				},
+				{
+					"name": "repplacenulls3",
+					"description": "Replacing Network_Traffic_Out (MB/s) null values"
+				},
+				{
+					"name": "replacenulls4",
+					"description": "Memory_Usage (%) nulls with avg %"
+				},
+				{
+					"name": "replacenulls5",
+					"description": "Replacing Disk_IO (%) nulls"
+				},
+				{
+					"name": "replacenulls6",
+					"description": "replace Network_Traffic_Out (MB/s) nulls"
+				},
+				{
+					"name": "renamingcolumns"
+				},
+				{
+					"name": "renamingcolumns2"
+				},
+				{
+					"name": "renamecols"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Server_ID as string,",
+				"          Hostname as string,",
+				"          IP_Address as string,",
+				"          OS_Type as string,",
+				"          Server_Location as string,",
+				"          Admin_Name as string,",
+				"          Server_Cluster as string,",
+				"          Admin_Email as string,",
+				"          Admin_Phone as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source(output(",
+				"          Log_ID as string,",
+				"          Server_ID as string,",
+				"          Server_Cluster as string,",
+				"          Log_Timestamp as string,",
+				"          {CPU_Utilization (%)} as float,",
+				"          {Memory_Usage (%)} as float,",
+				"          {Disk_IO (%)} as float,",
+				"          {Network_Traffic_In (MB/s)} as float,",
+				"          {Network_Traffic_Out (MB/s)} as float,",
+				"          {Uptime (Hours)} as float,",
+				"          {Downtime (Hours)} as float,",
+				"          Config_Version as string,",
+				"          Last_Patch_Date as string,",
+				"          Deployment_Token as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source2",
+				"source(output(",
+				"          Log_ID as string,",
+				"          Server_ID as string,",
+				"          Server_Cluster as string,",
+				"          Log_Timestamp as string,",
+				"          {CPU_Utilization (%)} as float,",
+				"          {Memory_Usage (%)} as float,",
+				"          {Disk_IO (%)} as float,",
+				"          {Network_Traffic_In (MB/s)} as float,",
+				"          {Network_Traffic_Out (MB/s)} as float,",
+				"          {Uptime (Hours)} as float,",
+				"          {Downtime (Hours)} as float",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source3",
+				"source2 derive({Memory_Usage (%)} = iifNull({Memory_Usage (%)},30)) ~> replacenulls",
+				"replacenulls derive({Disk_IO (%)} = iifNull({Disk_IO (%)},0)) ~> replacenulls1",
+				"replacenulls1 derive({Network_Traffic_Out (MB/s)} = iifNull({Network_Traffic_Out (MB/s)},0)) ~> repplacenulls3",
+				"source3 derive({Memory_Usage (%)} = iifNull({Memory_Usage (%)},30)) ~> replacenulls4",
+				"replacenulls4 derive({Disk_IO (%)} = iifNull({Disk_IO (%)},0)) ~> replacenulls5",
+				"replacenulls5 derive({Network_Traffic_Out (MB/s)} = iifNull({Network_Traffic_Out (MB/s)},0)) ~> replacenulls6",
+				"repplacenulls3 select(mapColumn(",
+				"          Log_ID,",
+				"          Server_ID,",
+				"          Server_Cluster,",
+				"          Log_Timestamp,",
+				"          CPU_Utilization_pct = {CPU_Utilization (%)},",
+				"          Memory_Usage_pct = {Memory_Usage (%)},",
+				"          Disk_IO_pct = {Disk_IO (%)},",
+				"          Network_Traffic_In_mbps = {Network_Traffic_In (MB/s)},",
+				"          Network_Traffic_Out_mbps = {Network_Traffic_Out (MB/s)},",
+				"          Uptime_Hours = {Uptime (Hours)},",
+				"          Downtime_Hours = {Downtime (Hours)},",
+				"          Config_Version,",
+				"          Last_Patch_Date,",
+				"          Deployment_Token",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> renamingcolumns",
+				"replacenulls6 select(mapColumn(",
+				"          Log_ID,",
+				"          Server_ID,",
+				"          Server_Cluster,",
+				"          Log_Timestamp,",
+				"          CPU_Utilization_pct = {CPU_Utilization (%)},",
+				"          Memory_Usage_pct = {Memory_Usage (%)},",
+				"          Disk_IO_pct = {Disk_IO (%)},",
+				"          Network_Traffic_In_mbps = {Network_Traffic_In (MB/s)},",
+				"          Network_Traffic_Out_mbps = {Network_Traffic_Out (MB/s)},",
+				"          Uptime_Hours = {Uptime (Hours)},",
+				"          Downtime_Hours = {Downtime (Hours)}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> renamingcolumns2",
+				"source1 select(mapColumn(",
+				"          Server_id = Server_ID,",
+				"          Hostname,",
+				"          IP_Address,",
+				"          OS_Type,",
+				"          Server_Location,",
+				"          Admin_Name,",
+				"          Server_Cluster,",
+				"          Admin_Email,",
+				"          Admin_Phone",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> renamecols",
+				"renamingcolumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink",
+				"renamingcolumns2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1",
+				"renamecols sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Log_ID as string,",
+				"          Server_ID as string,",
+				"          Server_Cluster as string,",
+				"          Log_Timestamp as string,",
+				"          CPU_Utilization_pct as float,",
+				"          Memory_Usage_pct as float,",
+				"          Disk_IO_pct as float,",
+				"          Network_Traffic_In_mbps as float,",
+				"          Network_Traffic_Out_mbps as float,",
+				"          Uptime_Hours as float,",
+				"          Downtime_Hours as float",
+				"     ),",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2"
+			]
+		}
+	}
+}

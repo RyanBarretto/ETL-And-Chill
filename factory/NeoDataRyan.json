@@ -1,0 +1,9 @@
+{
+	"name": "NeoDataRyan",
+	"location": "southindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "3e4b3db9-9a2b-46c6-88c5-52b07cd41623",
+		"tenantId": "85038d86-8f46-433b-af19-22fab7301b4e"
+	}
+}

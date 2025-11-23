@@ -1,0 +1,66 @@
+{
+	"name": "Parquet1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "linkedserviceDL",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "filesout",
+				"fileSystem": "reporting"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "Log_ID",
+				"type": "UTF8"
+			},
+			{
+				"name": "Server_ID",
+				"type": "UTF8"
+			},
+			{
+				"name": "Server_Cluster",
+				"type": "UTF8"
+			},
+			{
+				"name": "Log_Timestamp",
+				"type": "UTF8"
+			},
+			{
+				"name": "CPU_Utilization_pct",
+				"type": "FLOAT"
+			},
+			{
+				"name": "Memory_Usage_pct",
+				"type": "FLOAT"
+			},
+			{
+				"name": "Disk_IO_pct",
+				"type": "FLOAT"
+			},
+			{
+				"name": "Network_Traffic_In_mbps",
+				"type": "FLOAT"
+			},
+			{
+				"name": "Network_Traffic_Out_mbps",
+				"type": "FLOAT"
+			},
+			{
+				"name": "Uptime_Hours",
+				"type": "FLOAT"
+			},
+			{
+				"name": "Downtime_Hours",
+				"type": "FLOAT"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
